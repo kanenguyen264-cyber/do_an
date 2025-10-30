@@ -62,6 +62,16 @@ export class BorrowingController {
     return this.borrowingService.findAll({ userId, bookId, status, page, limit });
   }
 
+  @Post('borrow')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.READER)
+  @ApiOperation({ summary: 'Borrow a book (Reader only)' })
+  borrowBook(@CurrentUser() user: any, @Body() createBorrowingDto: CreateBorrowingDto) {
+    // Override userId with current user
+    createBorrowingDto.userId = user.userId;
+    return this.borrowingService.create(createBorrowingDto);
+  }
+
   @Get('my-borrowings')
   @ApiOperation({ summary: 'Get current user borrowing history' })
   getMyBorrowings(@CurrentUser() user: any) {

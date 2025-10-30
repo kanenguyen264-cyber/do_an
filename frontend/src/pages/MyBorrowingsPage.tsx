@@ -74,8 +74,11 @@ export default function MyBorrowingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">My Borrowed Books</h1>
-        <p className="text-muted-foreground mt-1">Manage your borrowed books and history</p>
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          <BookOpen className="w-8 h-8 text-primary" />
+          Sách Của Tôi
+        </h1>
+        <p className="text-muted-foreground mt-1">Quản lý sách đang mượn và lịch sử mượn sách</p>
       </div>
 
       {/* Filter Tabs */}
@@ -88,7 +91,7 @@ export default function MyBorrowingsPage() {
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          Active ({borrowings.filter((b) => b.status === 'active' || b.status === 'overdue').length})
+          Đang Mượn ({borrowings.filter((b) => b.status === 'active' || b.status === 'overdue').length})
         </button>
         <button
           onClick={() => setFilter('returned')}
@@ -98,7 +101,7 @@ export default function MyBorrowingsPage() {
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          Returned ({borrowings.filter((b) => b.status === 'returned').length})
+          Đã Trả ({borrowings.filter((b) => b.status === 'returned').length})
         </button>
         <button
           onClick={() => setFilter('all')}
@@ -108,7 +111,7 @@ export default function MyBorrowingsPage() {
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          All ({borrowings.length})
+          Tất Cả ({borrowings.length})
         </button>
       </div>
 
@@ -117,16 +120,16 @@ export default function MyBorrowingsPage() {
         <Card>
           <CardContent className="py-12 text-center">
             <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No borrowings found</h3>
+            <h3 className="text-lg font-semibold mb-2">Không tìm thấy phiếu mượn</h3>
             <p className="text-muted-foreground mb-4">
               {filter === 'active'
-                ? "You don't have any active borrowings"
+                ? "Bạn chưa có sách đang mượn"
                 : filter === 'returned'
-                ? "You haven't returned any books yet"
-                : "You haven't borrowed any books yet"}
+                ? "Bạn chưa trả sách nào"
+                : "Bạn chưa mượn sách nào"}
             </p>
             <Link to="/books">
-              <Button>Browse Books</Button>
+              <Button>Khám Phá Sách</Button>
             </Link>
           </CardContent>
         </Card>
@@ -154,46 +157,46 @@ export default function MyBorrowingsPage() {
 
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                         <div>
-                          <p className="text-xs text-muted-foreground">Borrowed</p>
+                          <p className="text-xs text-muted-foreground">Ngày mượn</p>
                           <p className="text-sm font-medium">
-                            {new Date(borrowing.borrowDate).toLocaleDateString()}
+                            {new Date(borrowing.borrowDate).toLocaleDateString('vi-VN')}
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground">Due Date</p>
+                          <p className="text-xs text-muted-foreground">Hạn trả</p>
                           <p className="text-sm font-medium">
-                            {new Date(borrowing.dueDate).toLocaleDateString()}
+                            {new Date(borrowing.dueDate).toLocaleDateString('vi-VN')}
                           </p>
                         </div>
                         {borrowing.returnDate && (
                           <div>
-                            <p className="text-xs text-muted-foreground">Returned</p>
+                            <p className="text-xs text-muted-foreground">Đã trả</p>
                             <p className="text-sm font-medium">
-                              {new Date(borrowing.returnDate).toLocaleDateString()}
+                              {new Date(borrowing.returnDate).toLocaleDateString('vi-VN')}
                             </p>
                           </div>
                         )}
                         <div>
-                          <p className="text-xs text-muted-foreground">Status</p>
+                          <p className="text-xs text-muted-foreground">Trạng thái</p>
                           <div className="flex items-center gap-2 mt-1">
                             {isOverdue && (
-                              <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">
-                                Overdue
+                              <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded font-medium">
+                                Quá hạn
                               </span>
                             )}
                             {isDueSoon && !isOverdue && (
-                              <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
-                                Due Soon
+                              <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded font-medium">
+                                Sắp đến hạn
                               </span>
                             )}
                             {borrowing.status === 'active' && !isOverdue && !isDueSoon && (
-                              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                                Active
+                              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded font-medium">
+                                Đang mượn
                               </span>
                             )}
                             {borrowing.status === 'returned' && (
-                              <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                                Returned
+                              <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded font-medium">
+                                Đã trả
                               </span>
                             )}
                           </div>
@@ -218,8 +221,8 @@ export default function MyBorrowingsPage() {
                               }`}
                             >
                               {isOverdue
-                                ? `This book is ${Math.abs(daysRemaining)} days overdue`
-                                : `This book is due in ${daysRemaining} days`}
+                                ? `Sách quá hạn ${Math.abs(daysRemaining)} ngày`
+                                : `Còn ${daysRemaining} ngày đến hạn trả`}
                             </p>
                             <p
                               className={`text-xs mt-1 ${
@@ -227,8 +230,8 @@ export default function MyBorrowingsPage() {
                               }`}
                             >
                               {isOverdue
-                                ? 'Please return it as soon as possible to avoid additional fines'
-                                : 'Please return or renew before the due date'}
+                                ? 'Vui lòng trả sách sớm để tránh bị phạt thêm'
+                                : 'Vui lòng trả hoặc gia hạn trước hạn'}
                             </p>
                           </div>
                         </div>
@@ -244,7 +247,7 @@ export default function MyBorrowingsPage() {
                           className="ml-4"
                         >
                           <RefreshCw className="w-4 h-4 mr-2" />
-                          Renew ({borrowing.renewCount}/{borrowing.maxRenewals})
+                          Gia Hạn ({borrowing.renewCount}/{borrowing.maxRenewals})
                         </Button>
                       )}
                   </div>

@@ -38,14 +38,13 @@ export default function BookDetailPage() {
 
     setBorrowing(true);
     try {
-      await api.post('/borrowing', {
-        userId: user.userId,
+      await api.post('/borrowing/borrow', {
         bookId: id,
       });
-      alert('Book borrowed successfully!');
+      alert('Mượn sách thành công!');
       fetchBook();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to borrow book');
+      alert(error.response?.data?.message || 'Không thể mượn sách');
     } finally {
       setBorrowing(false);
     }
@@ -62,10 +61,10 @@ export default function BookDetailPage() {
       await api.post('/reservations', {
         bookId: id,
       });
-      alert('Book reserved successfully!');
+      alert('Đặt trước sách thành công!');
       fetchBook();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to reserve book');
+      alert(error.response?.data?.message || 'Không thể đặt trước sách');
     } finally {
       setReserving(false);
     }
@@ -130,7 +129,7 @@ export default function BookDetailPage() {
                   disabled={borrowing}
                 >
                   <BookMarked className="w-4 h-4 mr-2" />
-                  {borrowing ? 'Borrowing...' : 'Borrow Book'}
+                  {borrowing ? 'Đang mượn...' : 'Mượn Sách'}
                 </Button>
               )}
 
@@ -142,7 +141,7 @@ export default function BookDetailPage() {
                   disabled={reserving}
                 >
                   <Calendar className="w-4 h-4 mr-2" />
-                  {reserving ? 'Reserving...' : 'Reserve Book'}
+                  {reserving ? 'Đang đặt...' : 'Đặt Trước'}
                 </Button>
               )}
 
