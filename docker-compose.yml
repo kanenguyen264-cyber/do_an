@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: library-backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=aws-1-ap-southeast-1.pooler.supabase.com
+      - DB_PORT=5432
+      - DB_USERNAME=postgres.kslaskzvzxlveqhgnaeh
+      - DB_PASSWORD=Thehoa2604@
+      - DB_DATABASE=postgres
+      - JWT_SECRET=your-secret-key-change-this-in-production
+      - NEST_PORT=3001
+    depends_on:
+      - python-service
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: library-frontend
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_URL=http://localhost:3001
+      - VITE_PYTHON_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  python-service:
+    build:
+      context: ./python-service
+      dockerfile: Dockerfile
+    container_name: library-python
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres.kslaskzvzxlveqhgnaeh:Thehoa2604%40@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres
+      - FASTAPI_ENV=development
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  app-network:
+    driver: bridge
