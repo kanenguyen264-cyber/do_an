@@ -22,7 +22,7 @@ ENV/
 Thumbs.db
 
 # Environment variables
-.env
+
 .env.local
 .env.*.local
 
@@ -48,3 +48,9 @@ htmlcov/
 .cache/
 .pytest_cache/
 .mypy_cache/
+
+# Prisma
+prisma/migrations/
+
+# Docker
+.dockerignore

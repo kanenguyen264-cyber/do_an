@@ -1,0 +1,257 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  ADMIN
+  LIBRARIAN
+  READER
+}
+
+enum UserType {
+  STUDENT
+  TEACHER
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+}
+
+enum BorrowingStatus {
+  PENDING
+  APPROVED
+  BORROWED
+  RETURNED
+  OVERDUE
+  REJECTED
+}
+
+enum ViolationType {
+  LATE_RETURN
+  DAMAGED
+  LOST
+}
+
+enum ViolationStatus {
+  PENDING
+  RESOLVED
+}
+
+model User {
+  id            String        @id @default(uuid())
+  email         String        @unique
+  password      String
+  fullName      String
+  userCode      String        @unique // Mã sinh viên hoặc mã giảng viên
+  userType      UserType      // STUDENT hoặc TEACHER
+  role          UserRole      @default(READER)
+  status        UserStatus    @default(ACTIVE)
+  phone         String?
+  avatar        String?
+  resetToken    String?
+  resetTokenExpiry DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  borrowings    Borrowing[]
+  reviews       Review[]
+  notifications Notification[]
+  violations    Violation[]
+  activityLogs  ActivityLog[]
+
+  @@map("users")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  books       Book[]
+
+  @@map("categories")
+}
+
+model Author {
+  id          String   @id @default(uuid())
+  name        String
+  bio         String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  books       BookAuthor[]
+
+  @@map("authors")
+}
+
+model Publisher {
+  id          String   @id @default(uuid())
+  name        String
+  address     String?
+  phone       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  books       Book[]
+
+  @@map("publishers")
+}
+
+model Book {
+  id              String   @id @default(uuid())
+  title           String
+  isbn            String?  @unique
+  description     String?
+  coverImage      String?
+  publishYear     Int?
+  totalCopies     Int      @default(1)
+  availableCopies Int      @default(1)
+  shelfLocation   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  categoryId      String
+  category        Category @relation(fields: [categoryId], references: [id])
+  
+  publisherId     String?
+  publisher       Publisher? @relation(fields: [publisherId], references: [id])
+  
+  authors         BookAuthor[]
+  borrowings      Borrowing[]
+  reviews         Review[]
+
+  @@map("books")
+}
+
+model BookAuthor {
+  bookId    String
+  authorId  String
+  
+  book      Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  author    Author @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  @@id([bookId, authorId])
+  @@map("book_authors")
+}
+
+model Borrowing {
+  id              String          @id @default(uuid())
+  status          BorrowingStatus @default(PENDING)
+  borrowDate      DateTime?
+  dueDate         DateTime?
+  returnDate      DateTime?
+  renewalCount    Int             @default(0)
+  notes           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
+  
+  bookId          String
+  book            Book            @relation(fields: [bookId], references: [id])
+  
+  violations      Violation[]
+
+  @@map("borrowings")
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  rating      Int      // 1-5 stars
+  comment     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  bookId      String
+  book        Book     @relation(fields: [bookId], references: [id])
+  
+  @@unique([userId, bookId])
+  @@map("reviews")
+}
+
+model Violation {
+  id              String          @id @default(uuid())
+  type            ViolationType
+  status          ViolationStatus @default(PENDING)
+  daysLate        Int?
+  fineAmount      Float           @default(0)
+  description     String?
+  resolvedAt      DateTime?
+  resolvedBy      String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
+  
+  borrowingId     String
+  borrowing       Borrowing       @relation(fields: [borrowingId], references: [id])
+
+  @@map("violations")
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  title       String
+  message     String
+  isRead      Boolean  @default(false)
+  type        String   // 'DUE_SOON', 'OVERDUE', 'APPROVED', 'REJECTED', 'GENERAL'
+  createdAt   DateTime @default(now())
+  
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+model SystemConfig {
+  id                    String   @id @default(uuid())
+  libraryName           String   @default("Thư viện Trường Đại học")
+  libraryLogo           String?
+  libraryDescription    String?
+  workingHours          String?
+  contactEmail          String?
+  contactPhone          String?
+  address               String?
+  maxBooksPerUser       Int      @default(5)
+  defaultBorrowDays     Int      @default(14)
+  maxRenewalCount       Int      @default(1)
+  lateFeePerDay         Float    @default(5000)
+  damageFeePercentage   Float    @default(20)
+  lostBookFeeMultiplier Float    @default(1)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("system_config")
+}
+
+model ActivityLog {
+  id          String   @id @default(uuid())
+  action      String   // 'CREATE', 'UPDATE', 'DELETE', 'BORROW', 'RETURN', etc.
+  entity      String   // 'BOOK', 'USER', 'BORROWING', etc.
+  entityId    String
+  description String
+  createdAt   DateTime @default(now())
+  
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@map("activity_logs")
+}
