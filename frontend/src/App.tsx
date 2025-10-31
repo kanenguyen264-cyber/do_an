@@ -13,6 +13,7 @@ import DashboardPage from './pages/admin/DashboardPage';
 import AdminBooksPage from './pages/admin/BooksPage';
 import AdminUsersPage from './pages/admin/UsersPage';
 import AdminBorrowingsPage from './pages/admin/BorrowingsPage';
+import SettingsPage from './pages/admin/SettingsPage';
 
 // Layouts
 import MainLayout from './components/layouts/MainLayout';
@@ -73,6 +74,7 @@ function App() {
         <Route path="books" element={<AdminBooksPage />} />
         <Route path="users" element={<AdminUsersPage />} />
         <Route path="borrowings" element={<AdminBorrowingsPage />} />
+        <Route path="settings" element={<SettingsPage />} />
       </Route>
     </Routes>
   );
